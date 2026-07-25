@@ -13,6 +13,9 @@ MEDIA="$ROOT/public/media"
 REF="$IMG/portrait-architect.webp"
 
 STYLE="Photorealistic, editorial quality, professional photography, rich but restrained Nordic color grade, shallow depth of field. No text, no logos, no watermarks, no readable writing."
+# The "before" shots must look like what a client actually uploads — an
+# amateur phone snapshot, deliberately NOT the editorial style above.
+RAW="Authentic amateur smartphone snapshot, unedited, flat mediocre indoor lighting, slightly awkward framing with too much headroom, everyday realistic phone-camera quality, mundane setting. Photorealistic. No text, no logos, no watermarks, no readable writing."
 SAME="The exact same woman as in the reference photo: a Scandinavian architect in her early 40s with long blonde hair, identical face and features, wearing dark clothing."
 VIDEO_VER="d867e39d045d6449a05b8dd3bc10ea3acca69b99aebc34b831809c09cd523527"  # alibaba/happyhorse-1.0
 
@@ -22,11 +25,14 @@ REF_B64=$(mktemp)
 { printf 'data:image/webp;base64,'; base64 -w0 "$REF"; } > "$REF_B64"
 trap 'rm -f "$REF_B64"' EXIT
 
-gen() { # slug aspect use_ref prompt
-  local slug=$1 aspect=$2 use_ref=$3 prompt=$4 dest="$IMG/$1.jpg" body
-  [ -s "$dest" ] && { echo "[$slug] exists, skip"; return 0; }
-  if [ "$use_ref" = ref ]; then
-    body=$(jq -n --arg p "$prompt $STYLE" --arg ar "$aspect" --rawfile r "$REF_B64" \
+gen() { # slug aspect use_ref(ref|refraw|none) prompt
+  local slug=$1 aspect=$2 use_ref=$3 prompt=$4 dest="$IMG/$1.jpg" body sty="$STYLE"
+  [ "$use_ref" = refraw ] && sty="$RAW"
+  # The jpg is converted to webp and deleted after generation, so treat an
+  # existing webp as done too — otherwise every re-run re-shoots everything.
+  { [ -s "$dest" ] || [ -s "$IMG/$slug.webp" ]; } && { echo "[$slug] exists, skip"; return 0; }
+  if [ "$use_ref" = ref ] || [ "$use_ref" = refraw ]; then
+    body=$(jq -n --arg p "$prompt $sty" --arg ar "$aspect" --rawfile r "$REF_B64" \
       '{input:{prompt:$p, aspect_ratio:$ar, output_format:"jpg", image_input:[$r]}}')
   else
     body=$(jq -n --arg p "$prompt $STYLE" --arg ar "$aspect" \
@@ -70,6 +76,10 @@ gen headshot-editorial "4:5" ref "$SAME An environmental editorial portrait outd
 gen project-koge "4:3" none "Danish courtyard housing at golden hour: a calm residential courtyard enclosed by three-storey limewashed buildings in warm off-white, timber window frames, young birch trees and bicycles in the courtyard, long soft shadows, architectural photography, no people."
 gen project-limewash "4:3" none "A quiet row of Danish terraced houses with pale limewash facades and oak doors, morning light raking across the textured plaster, small front gardens with wild grasses, overcast-to-sun sky, architectural photography, straight-on elevation, no people."
 gen project-harbor "4:3" none "Scandinavian waterside apartment buildings in pale brick and oak, stepping gently down toward calm water, a wooden boardwalk in the foreground, soft morning light, gentle reflections, architectural photography, no people."
+
+# --- "before" client uploads (same person, deliberately amateur) ---------
+gen before-snap-1 "3:4" refraw "The exact same woman as in the reference photo, identical face: a casual snapshot taken by a friend at a kitchen table at home, gray sweater, coffee mug nearby, plain wall and cluttered counter behind, mild motion blur, ordinary and unflattering but friendly."
+gen before-snap-2 "4:3" refraw "The exact same woman as in the reference photo, identical face: an amateur outdoor snapshot on an overcast street, practical rain jacket, squinting slightly, distracting parked bicycles and a bin in the background, centered tourist-photo composition."
 
 # --- film poster (same person, matches the film scene) -------------------
 gen astrid-film-poster "16:9" ref "$SAME A cinematic film still: she leans over a large pale-wood architectural model in a concrete-and-oak Copenhagen studio, adjusting a tiny timber block, tall industrial windows with soft harbor light behind her, dust motes in the light."
