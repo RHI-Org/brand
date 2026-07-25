@@ -1,8 +1,6 @@
-# Brand — B2B Brand Studio
+# Brand by Experience Plus
 
-B2B brand strategy, identity, and design systems by Experience Plus.
-React/Vite site on GitHub Pages at `brand.experienceplus.ai`.
-Sibling studio: [Lilikoi](https://lilikoi.one) (personal branding).
+Personal-brand strategy, photography, video, and content systems. Scandinavian, mobile-first React/Vite site hosted on GitHub Pages at `lilikoi.one`.
 
 ## Development
 
@@ -12,4 +10,10 @@ npm run dev
 npm run build
 ```
 
-Images are generated via `scripts/gen-images.sh` (Replicate).
+## Payments
+
+The package buttons currently open a clearly labeled Stripe Checkout preview. To activate payments, implement `POST /api/create-checkout-session`, map package names to server-owned Stripe Price IDs, and replace the preview action with a redirect to the returned Checkout URL. Never expose the Stripe secret key in this static site.
+
+## Media
+
+All media used by the deployed site is stored under `public/media` with poster frames in `public/images`. Background video is muted, looping, inline on mobile, and has an accessible pause control.
