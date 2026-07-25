@@ -1,6 +1,6 @@
 # Brand by Experience Plus
 
-Personal-brand strategy, photography, video, and content systems. Scandinavian, mobile-first React/Vite site hosted on GitHub Pages at `brand.experienceplus.ai`.
+Personal-brand strategy, photography, video, and content systems. Scandinavian, mobile-first React/Vite site hosted on GitHub Pages at `lilikoi.one`.
 
 ## Development
 
